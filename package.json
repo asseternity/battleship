@@ -4,11 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest --maxWorkers=4 --cache --config jest.config.js",
+    "test": "jest",
     "build": "webpack --config webpack.prod.js",
-    "watch": "npm run watch:webpack -- --watch & npm run watch:test",
-    "watch:webpack": "webpack --watch --progress --config webpack.dev.js",
-    "watch:test": "jest --watch --maxWorkers=4 --cache --config jest.config.js",
+    "watch": "npm run webpack --watch --progress --config webpack.dev.js",
     "start": "webpack serve --open --config webpack.dev.js"
   },
   "keywords": [],

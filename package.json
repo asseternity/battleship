@@ -6,7 +6,7 @@
   "scripts": {
     "test": "jest",
     "build": "webpack --config webpack.prod.js",
-    "watch": "npm run webpack --watch --progress --config webpack.dev.js",
+    "watch": "webpack --watch --progress --config webpack.dev.js",
     "start": "webpack serve --open --config webpack.dev.js"
   },
   "keywords": [],

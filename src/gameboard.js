@@ -17,7 +17,7 @@ export default class Gameboard {
   }
   placeShip(coordinates) {
     // what format should the coordinates be in?
-    // coordinates = [[[1], [2]], [[1], [3]], [[1], [4]]]
+    // coordinates = [[1, 2], [1, 3], [1, 4]]
     // iterate through the coordinates array
     // placing "ship" in each cell
     let ship = new Ship(coordinates.length);

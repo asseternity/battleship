@@ -1,14 +1,24 @@
 import Player from "./player";
-import Gameboard from "./gameboard";
-import Ship from "./ship";
 import "./styles.css";
 
+let player2;
+
 class DOMManipulator {
-  createGameboard(playerName, isHuman) {
+  createPlayer(playerName, isHuman) {
     let newPlayer = new Player(playerName, isHuman);
-    newPlayer.gameboard.createGameboard();
+
+    if (newPlayer.isHuman == true) {
+      this.placeShip(newPlayer);
+      player2 = this.createPlayer("player2", false);
+    }
+
     let container = document.querySelector(".container");
     let playerArea = document.createElement("div");
+    if (newPlayer.isHuman == true) {
+      playerArea.textContent = "Opponent's Board";
+    } else {
+      playerArea.textContent = "Your Board";
+    }
     container.appendChild(playerArea);
     let gameboardDiv = document.createElement("div");
     playerArea.appendChild(gameboardDiv);
@@ -23,10 +33,22 @@ class DOMManipulator {
         tile.style.gridColumn = `${i + 1}`;
         tile.style.gridRow = `${j + 1}`;
         gameboardDiv.appendChild(tile);
-        tile.addEventListener("click", () => {
-          newPlayer.gameboard.receiveAttack([i, j]);
-          this.updateTiles(newPlayer);
-        });
+        if (newPlayer.isHuman == true) {
+          tile.addEventListener("click", () => {
+            newPlayer.gameboard.receiveAttack([i, j]);
+            this.updateTiles(newPlayer);
+            if (newPlayer.gameboard.allShipsSunk()) {
+              alert("You win! Reload the page for another game.");
+              document.body.removeChild(container);
+            }
+            player2.gameboard.receiveRandomAttack();
+            this.updateTiles(player2);
+            if (player2.gameboard.allShipsSunk()) {
+              alert("You lose! Reload the page for another game.");
+              document.body.removeChild(container);
+            }
+          });
+        }
       }
     }
     return newPlayer;
@@ -36,6 +58,8 @@ class DOMManipulator {
     for (let i = 0; i < player.gameboard.board.length; i++) {
       for (let j = 0; j < player.gameboard.board[i].length; j++) {
         if (player.gameboard.board[i][j] == null) {
+          let tile = div.querySelector(`#TileID_${i}${j}`);
+          tile.textContent = " ";
         } else if (
           player.gameboard.board[i][j] == "miss" ||
           player.gameboard.board[i][j] == "hitShip"
@@ -49,25 +73,303 @@ class DOMManipulator {
       }
     }
   }
+  placeShip(player) {
+    let field_coordinate1 = document.querySelector("#coordinate1");
+    let field_coordinate2 = document.querySelector("#coordinate2");
+    let field_orientation = document.querySelector("#orientation");
+    let field_shipLength = document.querySelector("#shipLength");
+    let submitButton = document.querySelector('input[type="submit"]');
+
+    submitButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      let startingCoordinate1 = parseInt(field_coordinate1.value) - 1;
+      let startingCoordinate2 = parseInt(field_coordinate2.value) - 1;
+      let ship;
+      if (field_orientation.value == "horizontal") {
+        let coordinates1 = [
+          parseInt(startingCoordinate1),
+          parseInt(startingCoordinate2),
+        ];
+        let coordinates2 = [
+          parseInt(startingCoordinate1) + 1,
+          parseInt(startingCoordinate2),
+        ];
+        let coordinates3;
+        let coordinates4;
+        let coordinates5;
+        if (field_shipLength.value == 2) {
+          ship = player.gameboard.placeShip([coordinates1, coordinates2]);
+          this.updateTiles(player);
+        } else if (field_shipLength.value == 3) {
+          coordinates3 = [
+            parseInt(startingCoordinate1) + 2,
+            parseInt(startingCoordinate2),
+          ];
+          ship = player.gameboard.placeShip([
+            coordinates1,
+            coordinates2,
+            coordinates3,
+          ]);
+          this.updateTiles(player);
+        } else if (field_shipLength.value == 4) {
+          coordinates3 = [
+            parseInt(startingCoordinate1) + 2,
+            parseInt(startingCoordinate2),
+          ];
+          coordinates4 = [
+            parseInt(startingCoordinate1) + 3,
+            parseInt(startingCoordinate2),
+          ];
+          ship = player.gameboard.placeShip([
+            coordinates1,
+            coordinates2,
+            coordinates3,
+            coordinates4,
+          ]);
+          this.updateTiles(player);
+        } else if (field_shipLength.value == 5) {
+          coordinates3 = [
+            parseInt(startingCoordinate1) + 2,
+            parseInt(startingCoordinate2),
+          ];
+          coordinates4 = [
+            parseInt(startingCoordinate1) + 3,
+            parseInt(startingCoordinate2),
+          ];
+          coordinates5 = [
+            parseInt(startingCoordinate1) + 4,
+            parseInt(startingCoordinate2),
+          ];
+          ship = player.gameboard.placeShip([
+            coordinates1,
+            coordinates2,
+            coordinates3,
+            coordinates4,
+            coordinates5,
+          ]);
+          this.updateTiles(player);
+        }
+        if (typeof ship === "object") {
+          let selectedValue = field_shipLength.value;
+          let selectedOption = document.querySelector(
+            'option[value="' + selectedValue + '"]',
+          );
+          field_shipLength.removeChild(selectedOption);
+        } else {
+          alert("The tiles you selected are not empty!");
+        }
+      } // ***
+      // same but vertical
+      // ***
+      else {
+        let coordinates1 = [
+          parseInt(startingCoordinate1),
+          parseInt(startingCoordinate2),
+        ];
+        let coordinates2 = [
+          parseInt(startingCoordinate1),
+          parseInt(startingCoordinate2) + 1,
+        ];
+        let coordinates3;
+        let coordinates4;
+        let coordinates5;
+        if (field_shipLength.value == 2) {
+          ship = player.gameboard.placeShip([coordinates1, coordinates2]);
+          this.updateTiles(player);
+        } else if (field_shipLength.value == 3) {
+          coordinates3 = [
+            parseInt(startingCoordinate1),
+            parseInt(startingCoordinate2) + 2,
+          ];
+          ship = player.gameboard.placeShip([
+            coordinates1,
+            coordinates2,
+            coordinates3,
+          ]);
+          this.updateTiles(player);
+        } else if (field_shipLength.value == 4) {
+          coordinates3 = [
+            parseInt(startingCoordinate1),
+            parseInt(startingCoordinate2) + 2,
+          ];
+          coordinates4 = [
+            parseInt(startingCoordinate1),
+            parseInt(startingCoordinate2) + 3,
+          ];
+          ship = player.gameboard.placeShip([
+            coordinates1,
+            coordinates2,
+            coordinates3,
+            coordinates4,
+          ]);
+          this.updateTiles(player);
+        } else if (field_shipLength.value == 5) {
+          coordinates3 = [
+            parseInt(startingCoordinate1),
+            parseInt(startingCoordinate2) + 2,
+          ];
+          coordinates4 = [
+            parseInt(startingCoordinate1),
+            parseInt(startingCoordinate2) + 3,
+          ];
+          coordinates5 = [
+            parseInt(startingCoordinate1),
+            parseInt(startingCoordinate2) + 4,
+          ];
+          ship = player.gameboard.placeShip([
+            coordinates1,
+            coordinates2,
+            coordinates3,
+            coordinates4,
+            coordinates5,
+          ]);
+          this.updateTiles(player);
+        }
+        if (typeof ship === "object") {
+          let selectedValue = field_shipLength.value;
+          let selectedOption = document.querySelector(
+            'option[value="' + selectedValue + '"]',
+          );
+          field_shipLength.removeChild(selectedOption);
+        } else {
+          alert("The tiles you selected are not empty!");
+        }
+      }
+    });
+  }
+  clearGameboard(player) {
+    for (let i = 0; i < player.gameboard.board.length; i++) {
+      for (let j = 0; j < player.gameboard.board[i].length; j++) {
+        if (player.gameboard.board[i][j] !== null) {
+          player.gameboard.board[i][j] = null;
+        }
+      }
+    }
+    this.updateTiles(player);
+  }
+  placeRandomShips(player) {
+    let shipLengthsRemaining = [5, 4, 4, 3, 3, 3, 2, 2];
+    let orientations = ["horizontal", "vertical"];
+
+    this.clearGameboard(player);
+
+    while (shipLengthsRemaining.length !== 0) {
+      let random0to7 = Math.floor(Math.random() * 8);
+      let chosenLength = shipLengthsRemaining[random0to7];
+      let random0or1 = Math.floor(Math.random() * 2);
+      let chosenOrientation = orientations[random0or1];
+
+      let coordinate1 = Math.floor(Math.random() * 10);
+      let coordinate2 = Math.floor(Math.random() * 10);
+
+      let ship;
+
+      if (chosenOrientation == "horizontal") {
+        let coordinates1 = [coordinate1, coordinate2];
+        let coordinates2 = [coordinate1 + 1, coordinate2];
+        let coordinates3;
+        let coordinates4;
+        let coordinates5;
+        if (chosenLength == 2) {
+          ship = player.gameboard.placeShip([coordinates1, coordinates2]);
+          this.updateTiles(player);
+        } else if (chosenLength == 3) {
+          coordinates3 = [coordinate1 + 2, coordinate2];
+          ship = player.gameboard.placeShip([
+            coordinates1,
+            coordinates2,
+            coordinates3,
+          ]);
+          this.updateTiles(player);
+        } else if (chosenLength == 4) {
+          coordinates3 = [coordinate1 + 2, coordinate2];
+          coordinates4 = [coordinate1 + 3, coordinate2];
+          ship = player.gameboard.placeShip([
+            coordinates1,
+            coordinates2,
+            coordinates3,
+            coordinates4,
+          ]);
+          this.updateTiles(player);
+        } else if (chosenLength == 5) {
+          coordinates3 = [coordinate1 + 2, coordinate2];
+          coordinates4 = [coordinate1 + 3, coordinate2];
+          coordinates5 = [coordinate1 + 4, coordinate2];
+          ship = player.gameboard.placeShip([
+            coordinates1,
+            coordinates2,
+            coordinates3,
+            coordinates4,
+            coordinates5,
+          ]);
+          this.updateTiles(player);
+        }
+        if (!(ship instanceof Error)) {
+          shipLengthsRemaining.splice(random0to7, 1);
+        }
+      } else {
+        let coordinates1 = [coordinate1, coordinate2];
+        let coordinates2 = [coordinate1, coordinate2 + 1];
+        let coordinates3;
+        let coordinates4;
+        let coordinates5;
+        if (chosenLength == 2) {
+          ship = player.gameboard.placeShip([coordinates1, coordinates2]);
+          this.updateTiles(player);
+        } else if (chosenLength == 3) {
+          coordinates3 = [coordinate1, coordinate2 + 2];
+          ship = player.gameboard.placeShip([
+            coordinates1,
+            coordinates2,
+            coordinates3,
+          ]);
+          this.updateTiles(player);
+        } else if (chosenLength == 4) {
+          coordinates3 = [coordinate1, coordinate2 + 2];
+          coordinates4 = [coordinate1, coordinate2 + 3];
+          ship = player.gameboard.placeShip([
+            coordinates1,
+            coordinates2,
+            coordinates3,
+            coordinates4,
+          ]);
+          this.updateTiles(player);
+        } else if (chosenLength == 5) {
+          coordinates3 = [coordinate1, coordinate2 + 2];
+          coordinates4 = [coordinate1, coordinate2 + 3];
+          coordinates5 = [coordinate1, coordinate2 + 4];
+          ship = player.gameboard.placeShip([
+            coordinates1,
+            coordinates2,
+            coordinates3,
+            coordinates4,
+            coordinates5,
+          ]);
+          this.updateTiles(player);
+        }
+        if (!(ship instanceof Error)) {
+          shipLengthsRemaining.splice(random0to7, 1);
+        }
+      }
+    }
+  }
 }
 
 // testing zone
 let game = new DOMManipulator();
-let player1 = game.createGameboard("player1", true);
-console.log(player1);
-player1.gameboard.placeShip([
-  [1, 2],
-  [1, 3],
-  [1, 4],
-]);
-game.updateTiles(player1);
+let player1 = game.createPlayer("player1", true);
+game.placeRandomShips(player2);
 
-let player2 = game.createGameboard("player2", false);
-player2.gameboard.placeShip([
-  [6, 2],
-  [6, 3],
-  [6, 4],
-  [6, 5],
-  [6, 6],
-]);
-game.updateTiles(player2);
+// random ships for you
+let randomButton = document.querySelector("#randomButton");
+randomButton.addEventListener("click", () => {
+  game.placeRandomShips(player1);
+});
+
+// to do:
+// 2) you and your opponent attack your own boards! fix "your board vs opponent's board"
+// 3) hide opponent's ships from you
+// 4) you only go once all the ships are placed! (check if the children.length of select === 0)
+// 5) you go again if you hit
+// 6) opponent goes again if it hits
+// 7) delay between opponent's turns

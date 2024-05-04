@@ -1,6 +1,7 @@
 import Player from "./player";
 import "./styles.css";
 
+let player1;
 let player2;
 
 class DOMManipulator {
@@ -15,9 +16,9 @@ class DOMManipulator {
     let container = document.querySelector(".container");
     let playerArea = document.createElement("div");
     if (newPlayer.isHuman == true) {
-      playerArea.textContent = "Opponent's Board";
-    } else {
       playerArea.textContent = "Your Board";
+    } else {
+      playerArea.textContent = "Opponent's Board";
     }
     container.appendChild(playerArea);
     let gameboardDiv = document.createElement("div");
@@ -33,19 +34,31 @@ class DOMManipulator {
         tile.style.gridColumn = `${i + 1}`;
         tile.style.gridRow = `${j + 1}`;
         gameboardDiv.appendChild(tile);
-        if (newPlayer.isHuman == true) {
+        let shipSelect = document.querySelector("#shipLength");
+        if (!newPlayer.isHuman) {
           tile.addEventListener("click", () => {
-            newPlayer.gameboard.receiveAttack([i, j]);
-            this.updateTiles(newPlayer);
-            if (newPlayer.gameboard.allShipsSunk()) {
-              alert("You win! Reload the page for another game.");
-              document.body.removeChild(container);
-            }
-            player2.gameboard.receiveRandomAttack();
-            this.updateTiles(player2);
-            if (player2.gameboard.allShipsSunk()) {
-              alert("You lose! Reload the page for another game.");
-              document.body.removeChild(container);
+            if (randomPressed || shipSelect.children.length == 0) {
+              let playersTurn = newPlayer.gameboard.receiveAttack([i, j]);
+              this.updateTiles(newPlayer);
+              if (newPlayer.gameboard.allShipsSunk()) {
+                alert("You win! Reload the page for another game.");
+                document.body.removeChild(container);
+              }
+              if (playersTurn == "miss") {
+                let computersTurn;
+                while (computersTurn !== "miss") {
+                  computersTurn = player1.gameboard.receiveRandomAttack();
+                  this.updateTiles(player1);
+                  if (player1.gameboard.allShipsSunk()) {
+                    alert("You lose! Reload the page for another game.");
+                    document.body.removeChild(container);
+                  }
+                }
+              }
+            } else {
+              alert(
+                "Please place all your ships or hit 'Random' before attacking!",
+              );
             }
           });
         }
@@ -60,15 +73,19 @@ class DOMManipulator {
         if (player.gameboard.board[i][j] == null) {
           let tile = div.querySelector(`#TileID_${i}${j}`);
           tile.textContent = " ";
-        } else if (
-          player.gameboard.board[i][j] == "miss" ||
-          player.gameboard.board[i][j] == "hitShip"
-        ) {
+        } else if (player.gameboard.board[i][j] == "miss") {
           let tile = div.querySelector(`#TileID_${i}${j}`);
-          tile.textContent = "x";
+          tile.textContent = "m";
+        } else if (player.gameboard.board[i][j] == "hitShip") {
+          let tile = div.querySelector(`#TileID_${i}${j}`);
+          tile.textContent = "h";
         } else {
           let tile = div.querySelector(`#TileID_${i}${j}`);
-          tile.textContent = "o";
+          if (player.isHuman) {
+            tile.textContent = "s";
+          } else {
+            tile.textContent = " ";
+          }
         }
       }
     }
@@ -357,19 +374,13 @@ class DOMManipulator {
 
 // testing zone
 let game = new DOMManipulator();
-let player1 = game.createPlayer("player1", true);
+player1 = game.createPlayer("player1", true);
 game.placeRandomShips(player2);
 
 // random ships for you
+let randomPressed = false;
 let randomButton = document.querySelector("#randomButton");
 randomButton.addEventListener("click", () => {
   game.placeRandomShips(player1);
+  randomPressed = true;
 });
-
-// to do:
-// 2) you and your opponent attack your own boards! fix "your board vs opponent's board"
-// 3) hide opponent's ships from you
-// 4) you only go once all the ships are placed! (check if the children.length of select === 0)
-// 5) you go again if you hit
-// 6) opponent goes again if it hits
-// 7) delay between opponent's turns

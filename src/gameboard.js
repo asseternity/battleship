@@ -92,6 +92,7 @@ export default class Gameboard {
     let coordinate2 = coordinates[1];
     if (this.board[coordinate1][coordinate2] === null) {
       this.board[coordinate1][coordinate2] = "miss";
+      return "miss";
     } else if (
       this.board[coordinate1][coordinate2] === "miss" ||
       this.board[coordinate1][coordinate2] === "hitShip"
@@ -101,17 +102,20 @@ export default class Gameboard {
       let hitShip = this.board[coordinate1][coordinate2];
       hitShip.isHit();
       this.board[coordinate1][coordinate2] = "hitShip";
+      return "hit";
     }
   }
   receiveRandomAttack() {
     let coordinate1 = Math.floor(Math.random() * 10);
     let coordinate2 = Math.floor(Math.random() * 10);
-    if (
-      this.board[coordinate1][coordinate2] !== "miss" ||
-      this.board[coordinate1][coordinate2] !== "hitShip"
+    while (
+      this.board[coordinate1][coordinate2] == "miss" ||
+      this.board[coordinate1][coordinate2] == "hitShip"
     ) {
-      this.receiveAttack([coordinate1, coordinate2]);
+      coordinate1 = Math.floor(Math.random() * 10);
+      coordinate2 = Math.floor(Math.random() * 10);
     }
+    return this.receiveAttack([coordinate1, coordinate2]);
   }
   allShipsSunk() {
     for (let i = 0; i < this.height; i++) {
